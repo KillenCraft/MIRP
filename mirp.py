@@ -1,7 +1,5 @@
 import argparse
 import os
-import shutil
-import tempfile
 import zipfile
 
 
@@ -15,20 +13,23 @@ def list_and_extract_zip_contents(tag, zip_file_path, extract_to):
                 for file_info in zip_ref.infolist():
                     # Skip directories
                     if not file_info.is_dir():
-                        print(f"  {file_info.filename}")
                         # Create a subfolder based on the file's name (excluding the extension)
                         subfolder_name = os.path.splitext(file_info.filename)[0]
                         subfolder_path = os.path.join(extract_to, subfolder_name)
                         os.makedirs(subfolder_path, exist_ok=True)
-                        # Create a temporary directory for extraction
-                        with tempfile.TemporaryDirectory() as temp_dir:
-                            # Extract the file to the temporary directory
-                            extracted_path = zip_ref.extract(file_info, temp_dir)
-                            # Move the file to the subfolder and rename it
-                            file_extension = os.path.splitext(file_info.filename)[1]
-                            new_file_name = f"{tag}{file_extension}"
-                            new_file_path = os.path.join(subfolder_path, new_file_name)
-                            shutil.move(extracted_path, new_file_path)
+
+                        # Read the file contents from the zip archive
+                        file_data = zip_ref.read(file_info.filename)
+
+                        # Determine the new file path
+                        file_extension = os.path.splitext(file_info.filename)[1]
+                        new_file_name = f"{tag}{file_extension}"
+                        new_file_path = os.path.join(subfolder_path, new_file_name)
+
+                        # Write the file contents to the new file path
+                        with open(new_file_path, 'wb') as new_file:
+                            new_file.write(file_data)
+
                 print(f"All files extracted to {extract_to}")
         except zipfile.BadZipFile:
             print(f"Error: {zip_file_path} is not a valid zip file.")
