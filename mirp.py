@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import zipfile
+from concurrent.futures import ThreadPoolExecutor
 
 from tqdm import tqdm
 
@@ -37,9 +38,11 @@ def list_and_extract_zip_contents(tag, zip_file_path, extract_to):
     try:
         with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
             logging.info(f"Contents of {zip_file_path}:")
-            for file_info in tqdm(zip_ref.infolist(), desc="Extracting files", unit="file"):
-                if not file_info.is_dir():
-                    extract_file(zip_ref, file_info, tag, extract_to)
+            file_infos = [file_info for file_info in zip_ref.infolist() if not file_info.is_dir()]
+
+            with ThreadPoolExecutor() as executor:
+                list(tqdm(executor.map(lambda file_info: extract_file(zip_ref, file_info, tag, extract_to), file_infos), total=len(file_infos), desc="Extracting files", unit="file"))
+
             logging.info(f"All files extracted to {extract_to}")
     except zipfile.BadZipFile:
         logging.error(f"Error: {zip_file_path} is not a valid zip file.")
