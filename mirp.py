@@ -13,9 +13,9 @@ def list_and_extract_zip_contents(tag, zip_file_path, extract_to):
                 # List all the contents of the zip file
                 print(f"Contents of {zip_file_path}:")
                 for file_info in zip_ref.infolist():
-                    print(f"  {file_info.filename} - {file_info.file_size} bytes")
                     # Skip directories
                     if not file_info.is_dir():
+                        print(f"  {file_info.filename}")
                         # Create a subfolder based on the file's name (excluding the extension)
                         subfolder_name = os.path.splitext(file_info.filename)[0]
                         subfolder_path = os.path.join(extract_to, subfolder_name)
