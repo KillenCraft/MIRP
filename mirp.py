@@ -2,6 +2,8 @@ import argparse
 import os
 import zipfile
 
+from tqdm import tqdm
+
 
 def list_and_extract_zip_contents(tag, zip_file_path, extract_to):
     # Check if the file is a zip file
@@ -10,7 +12,7 @@ def list_and_extract_zip_contents(tag, zip_file_path, extract_to):
             with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
                 # List all the contents of the zip file
                 print(f"Contents of {zip_file_path}:")
-                for file_info in zip_ref.infolist():
+                for file_info in tqdm(zip_ref.infolist(), desc="Extracting files", unit="file"):
                     # Skip directories
                     if not file_info.is_dir():
                         # Create a subfolder based on the file's name (excluding the extension)
