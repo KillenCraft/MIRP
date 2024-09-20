@@ -18,9 +18,7 @@ def list_and_extract_zip_contents(tag, zip_file_path, extract_to):
                     if not file_info.is_dir():
                         # Create a subfolder based on the file's name (excluding the extension)
                         subfolder_name = os.path.splitext(file_info.filename)[0]
-                        print(f"  folder name: {subfolder_name}")
                         subfolder_path = os.path.join(extract_to, subfolder_name)
-                        print(f"  folder path: {subfolder_path}")
                         os.makedirs(subfolder_path, exist_ok=True)
                         # Create a temporary directory for extraction
                         with tempfile.TemporaryDirectory() as temp_dir:
