@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/schollz/progressbar/v3"
 )
@@ -67,7 +68,20 @@ func ListAndExtractZipContents(tag string, zipFilePath string, extractTo string)
 	defer r.Close()
 
 	var wg sync.WaitGroup
-	bar := progressbar.Default(int64(len(r.File)))
+  bar := progressbar.NewOptions64(int64(len(r.File)),
+	progressbar.OptionSetDescription("Extracting files..."),
+	progressbar.OptionSetWriter(os.Stderr),
+	progressbar.OptionSetWidth(100),
+	progressbar.OptionThrottle(65*time.Millisecond),
+	progressbar.OptionShowCount(),
+	progressbar.OptionShowIts(),
+	progressbar.OptionSpinnerType(14),
+	progressbar.OptionFullWidth(),
+	progressbar.OptionSetRenderBlankState(true),
+	progressbar.OptionSetItsString("files"),
+	progressbar.OptionOnCompletion(func() {
+      fmt.Fprint(os.Stderr, "\n")
+	}))
 
 	for _, file := range r.File {
 		if !file.FileInfo().IsDir() {
@@ -77,7 +91,8 @@ func ListAndExtractZipContents(tag string, zipFilePath string, extractTo string)
 	}
 
 	wg.Wait()
-	fmt.Printf("All files extracted to %s\n", extractTo)
+  bar.Finish()
+	fmt.Printf("\nAll files extracted to %s\n", extractTo)
 }
 
 func main() {
